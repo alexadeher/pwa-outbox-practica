@@ -1,0 +1,33 @@
+:root {
+    --bg: #f1f5f9; --card: #ffffff; --text: #0f172a; --muted: #64748b;
+    --primary: #2563eb; --ok: #16a34a; --warn: #d97706; --danger: #dc2626; --border: #e2e8f0;
+}
+@media (prefers-color-scheme: dark) {
+    :root { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --muted: #94a3b8; --border: #334155; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
+header { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 20px; background: var(--primary); color: #fff; }
+header h1 { margin: 0; font-size: 1.15rem; }
+main { max-width: 720px; margin: 0 auto; padding: 16px; display: grid; gap: 16px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.card h2 { margin: 0 0 12px; font-size: 1.05rem; }
+form { display: grid; gap: 10px; }
+input, textarea { width: 100%; padding: 10px; font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 8px; }
+textarea { min-height: 90px; resize: vertical; }
+button { padding: 10px 16px; font: inherit; font-weight: 600; color: #fff; background: var(--primary); border: 0; border-radius: 8px; cursor: pointer; }
+button:hover { opacity: .9; }
+#btn-purgar { background: var(--danger); font-size: .85rem; padding: 8px 12px; }
+.header-lista { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.header-lista h2 { margin: 0; }
+.badge { padding: 4px 12px; border-radius: 999px; font-size: .8rem; font-weight: 700; color: #fff; }
+.badge.online { background: var(--ok); }
+.badge.offline { background: var(--danger); }
+ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+li { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px; border: 1px solid var(--border); border-radius: 8px; }
+li strong { flex: 1 1 140px; }
+li small { color: var(--muted); }
+li.vacio { color: var(--muted); justify-content: center; border-style: dashed; }
+.estado { padding: 2px 10px; border-radius: 999px; font-size: .75rem; font-weight: 700; color: #fff; text-transform: uppercase; }
+.estado.pendiente { background: var(--warn); }
+.estado.sincronizado { background: var(--ok); }

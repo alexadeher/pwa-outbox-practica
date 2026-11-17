@@ -3,9 +3,24 @@ const endpoint = 'https://jsonplaceholder.typicode.com/posts';
 // Registro del Service Worker (ruta relativa)
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js')
-        .then((reg) => console.log('[SW] Scope:', reg.scope))
-        .catch((err) => console.error('[SW] Error:', err));
+        .then((reg) => {
+            console.log('[SW] Scope:', reg.scope);
+        })
+        .catch((err) => {
+            console.error('[SW] Error:', err);
+        });
 }
+
+// Recibir mensajes del Service Worker
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data && event.data.tipo === 'OUTBOX_SINCRONIZADO') {
+            console.log('[UI] Confirmación recibida del Service Worker. Actualizando bandeja...');
+            renderizarColaOutbox();
+        }
+    });
+}
+
 
 // Indicador de red
 function actualizarIndicadorRed() {
@@ -47,22 +62,28 @@ function procesarEnvioReporte(datosFormulario){
             fechaCreacion: Date.now()
         });
         })
-        .catch(() => {
-        console.warn('[Outbox] Sin conexión. Encolando transacción localmente...');
-        // Falla de red: guardar en IndexedDB como pendiente para reenvío posterior
+    .catch(() => {
+        console.warn('[Outbox] Sin conexión. Encolando en IndexedDB...');
+
         return guardarRegistro({
             ...datosFormulario,
             estado: 'pendiente',
             fechaCreacion: Date.now()
-        });
         })
-        .then(() => {
-        // Actualizar la lista visual en ambos escenarios
-        return renderizarColaOutbox();
-        });
+            .then(() => {
+            // Detección de soporte para Background Sync API
+            if ('serviceWorker' in navigator && 'SyncManager' in window) {
+                return navigator.serviceWorker.ready
+                .then((registro) => {
+                    console.log('[Outbox] Registrando etiqueta sync-reportes en el SW...');
+                    return registro.sync.register('sync-reportes');
+                });
+            }
+            });
+        })
 }
 
-function sincronizarPendientes(){
+function sincronizarPendientesFallback(){
     console.log('[Outbox] Conexión detectada. Buscando registros pendientes...');
 
     return obtenerTodosLosRegistros()
@@ -102,7 +123,12 @@ function sincronizarPendientes(){
 // Escuchar el regreso de la conectividad (eventos de red)
 window.addEventListener('online', () => {
     actualizarIndicadorRed();
-    sincronizarPendientes();
+
+    // Degradación elegante: Solo sincronizar desde UI si el navegador NO soporta Background Sync (ej. Safari/iOS)
+    if (!('SyncManager' in window)) {
+        console.log('[Outbox] Navegador sin SyncManager. Ejecutando fallback por evento online...');
+        sincronizarPendientesFallback();
+    }
 });
 
 window.addEventListener('offline', actualizarIndicadorRed);
